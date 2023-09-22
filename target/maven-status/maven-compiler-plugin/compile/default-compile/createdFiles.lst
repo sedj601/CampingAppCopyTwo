@@ -1,0 +1,13 @@
+com\camping\model\Reservation.class
+com\camping\PrimaryController.class
+com\camping\App.class
+com\camping\model\Client.class
+com\camping\model\Parcel.class
+com\camping\PrimaryController$1.class
+com\camping\dao\SqliteDatabaseHandler.class
+module-info.class
+com\camping\service\ReservationService.class
+com\camping\DataModel.class
+com\camping\PrimaryController$2.class
+com\camping\SecondaryController.class
+com\camping\dao\FakeDatabaseHandler.class
