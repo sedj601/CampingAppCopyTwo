@@ -28,7 +28,9 @@ public class SqliteDatabaseHandler implements AutoCloseable
 
     public SqliteDatabaseHandler(){
         try {
+            
             connection = DriverManager.getConnection("jdbc:sqlite:main.sqlite3");
+            connection.createStatement().execute("PRAGMA foreign_keys = ON");
             System.out.println("Connected to SQLite Db: main.sqlite3");
         }
         catch (SQLException ex) {
