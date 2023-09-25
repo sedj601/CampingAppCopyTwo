@@ -8,6 +8,7 @@ import com.camping.dao.SqliteDatabaseHandler;
 import com.camping.model.Client;
 import com.camping.model.Parcel;
 import com.camping.model.Reservation;
+import com.camping.model.Reservation.STATUS;
 import java.util.List;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
@@ -126,7 +127,15 @@ public class DataModel {
         sqliteDatabaseHandler.closeConnection();
         
         return reservations;
-    }     
+    }    
+    
+    public boolean updateReservationStatus(Client client, Parcel parcel, STATUS oldStatus, STATUS newStatus){
+        SqliteDatabaseHandler sqliteDatabaseHandler = new SqliteDatabaseHandler();
+        boolean control = sqliteDatabaseHandler.updateReservationStatus(client, parcel, oldStatus, newStatus);
+        sqliteDatabaseHandler.closeConnection();
+        
+        return control;
+    }
     
     public boolean addNewReservation(Reservation reservation){
         SqliteDatabaseHandler sqliteDatabaseHandler = new SqliteDatabaseHandler();          

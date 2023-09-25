@@ -7,6 +7,7 @@ com\camping\PrimaryController$1.class
 com\camping\dao\SqliteDatabaseHandler.class
 module-info.class
 com\camping\service\ReservationService.class
+com\camping\model\Reservation$STATUS.class
 com\camping\DataModel.class
 com\camping\PrimaryController$2.class
 com\camping\SecondaryController.class

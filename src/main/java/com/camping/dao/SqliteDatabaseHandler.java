@@ -7,6 +7,7 @@ package com.camping.dao;
 import com.camping.model.Client;
 import com.camping.model.Parcel;
 import com.camping.model.Reservation;
+import com.camping.model.Reservation.STATUS;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -202,7 +203,8 @@ public class SqliteDatabaseHandler implements AutoCloseable
                         resultSet.getInt("client_id"), 
                         resultSet.getInt("parcel_id"),
                         LocalDateTime.parse(resultSet.getString("checkin_time"), Reservation.DATE_FORMATTER), 
-                        LocalDateTime.parse(resultSet.getString("checkout_time"), Reservation.DATE_FORMATTER)
+                        LocalDateTime.parse(resultSet.getString("checkout_time"), Reservation.DATE_FORMATTER),
+                        Reservation.STATUS.convertIntToStatus(resultSet.getInt("status"))
                 );
                 
                 data.add(reservation);
@@ -215,14 +217,32 @@ public class SqliteDatabaseHandler implements AutoCloseable
         return data;
     }
     
+    public boolean updateReservationStatus(Client client, Parcel parcel, STATUS oldStatus, STATUS newStatus){
+        String sqlQuery = "UPDATE reservation SET status = ? WHERE client_id = ? AND parcel_id = ? AND status = ?";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sqlQuery)) {
+            pstmt.setInt(1, STATUS.convertStatusToInt(newStatus));
+            pstmt.setInt(2, client.getId());
+            pstmt.setInt(3, parcel.getId());
+            pstmt.setInt(4, STATUS.convertStatusToInt(oldStatus));
+            pstmt.executeUpdate();
+            return true;
+        }
+        catch (SQLException ex) {
+            System.out.println("updateReservationStatus error:\n"  + ex.toString());
+            return false;
+        }
+    }
+    
     public boolean addNewReservation(Reservation reservation){
-        String sqlQuery = "INSERT INTO reservation(client_id, parcel_id, checkin_time, checkout_time) VALUES (?, ?, ?, ?)";
+        String sqlQuery = "INSERT INTO reservation(client_id, parcel_id, checkin_time, checkout_time, status) VALUES (?, ?, ?, ?, ?)";
 
         try (PreparedStatement pstmt = connection.prepareStatement(sqlQuery)) {
             pstmt.setInt(1, reservation.getClientId());
             pstmt.setInt(2, reservation.getParcelId());
             pstmt.setString(3, reservation.getCheckinTime().format(Reservation.DATE_FORMATTER));
             pstmt.setString(4, reservation.getCheckoutTime().format(Reservation.DATE_FORMATTER));
+            pstmt.setInt(5, Reservation.STATUS.convertStatusToInt(reservation.getStatus()));
             pstmt.executeUpdate();
 
             return true;
@@ -249,14 +269,15 @@ public class SqliteDatabaseHandler implements AutoCloseable
     }
     
     public boolean updateReservation(Reservation reservation){
-        String sqlQuery = "UPDATE reservation SET client_id = ?, parcel_id = ?, checkin_time = ?, checkout_time = ? WHERE reservation_id = ?";
+        String sqlQuery = "UPDATE reservation SET client_id = ?, parcel_id = ?, checkin_time = ?, checkout_time = ?, reservation_status = ? WHERE reservation_id = ?";
 
         try (PreparedStatement pstmt = connection.prepareStatement(sqlQuery)) {
             pstmt.setInt(1, reservation.getClientId());
             pstmt.setInt(2, reservation.getParcelId());
             pstmt.setString(3, reservation.getCheckinTime().format(Reservation.DATE_FORMATTER));
             pstmt.setString(4, reservation.getCheckoutTime().format(Reservation.DATE_FORMATTER));
-            pstmt.setInt(5, reservation.getReservationId());
+            pstmt.setInt(5, Reservation.STATUS.convertStatusToInt(reservation.getStatus()));
+            pstmt.setInt(6, reservation.getReservationId());
             pstmt.executeUpdate();
             return true;
         }
@@ -306,4 +327,7 @@ public class SqliteDatabaseHandler implements AutoCloseable
     public void close() throws Exception {
         closeConnection();
     }
+    
+    
+    
 }
