@@ -96,6 +96,10 @@ public class DataModel {
         return clients;
     }     
     
+    public Client getClient(Reservation reservation){
+        
+    }
+    
     public boolean addNewClient(Client client){
         SqliteDatabaseHandler sqliteDatabaseHandler = new SqliteDatabaseHandler();          
         boolean control = sqliteDatabaseHandler.addNewClient(client);        

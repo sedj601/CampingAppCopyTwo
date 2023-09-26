@@ -4,17 +4,20 @@
  */
 package com.camping.model;
 
+import java.util.Arrays;
 import java.util.Objects;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-/**
- *
- * @author blj0011
- */
+ 
+
 public class Client {
+    static public enum MODE {
+        SELECT_CLIENT, EDIT_CLIENT;
+    }
+    
     private final IntegerProperty id = new SimpleIntegerProperty();
     private final StringProperty firstName = new SimpleStringProperty();
     private final StringProperty lastName = new SimpleStringProperty();

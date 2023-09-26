@@ -1,11 +1,13 @@
 package com.camping;
 
 import com.camping.model.Client;
+import com.camping.model.Client.MODE;
 import com.camping.model.Parcel;
 import com.camping.model.Reservation;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
@@ -34,6 +36,7 @@ import javafx.scene.text.FontWeight;
 import org.controlsfx.control.GridCell;
 import org.controlsfx.control.GridView;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.javafx.StackedFontIcon;
 
 public class PrimaryController {
     @FXML GridView<Parcel> gvParcel;
@@ -47,12 +50,12 @@ public class PrimaryController {
     public void initDataModel(DataModel dataModel, ResourceBundle resourceBundle) {
         // ensure model is only set once:
         if (this.dataModel != null) {
-            throw new IllegalStateException("Model can only be initialized once");
+            throw new IllegalStateException(resourceBundle.getString("modelIllegalStateExceptionText"));
         }
         this.dataModel = dataModel ;
          
         if (this.resourceBundle != null) {
-            throw new IllegalStateException("Model can only be initialized once");
+            throw new IllegalStateException(resourceBundle.getString("resourcebundleIllegalStateExceptionText"));
         }
         this.resourceBundle = resourceBundle;
        
@@ -60,8 +63,6 @@ public class PrimaryController {
         clientList.addAll(dataModel.dbGetAllClients());
         
         setupGridView();
-        
-        
     }
     
     private void setupGridView(){
@@ -75,8 +76,10 @@ public class PrimaryController {
             
             Label lblStatusTitle = new Label();
             Label lblCurrentStatus = new Label();
-            FontIcon icon = new FontIcon("antf-home");
-            VBox vbCenterRoot = new VBox(lblStatusTitle, lblCurrentStatus, icon);
+            FontIcon iconHome = new FontIcon("antf-home");
+            FontIcon iconInfo = new FontIcon("antf-info-circle");
+            StackedFontIcon stackedFontIcon = new StackedFontIcon();
+            VBox vbCenterRoot = new VBox(lblStatusTitle, lblCurrentStatus, stackedFontIcon);
             
             Button btnReserveParcel = new Button();            
             BorderPane root = new BorderPane();
@@ -85,13 +88,20 @@ public class PrimaryController {
                 lblRoomId.setMaxWidth(Double.MAX_VALUE);
                 lblRoomId.setAlignment(Pos.CENTER);
                 lblRoomId.setFont(Font.font("System", FontWeight.BOLD, 35));
+                
                 iconDeleteRoom.setIconSize(25);
                 StackPane.setAlignment(iconDeleteRoom, Pos.TOP_RIGHT);
                 spTopRoot.setPadding(new Insets(10, 10, 0, 0));
                 
                 lblStatusTitle.setFont(Font.font("System", FontWeight.NORMAL, 16));
                 lblCurrentStatus.setFont(Font.font("System", FontWeight.NORMAL, 28));
-                icon.setIconSize(100);
+                iconInfo.setIconSize(100);
+                iconHome.setIconSize(100);
+                iconInfo.setIconColor(Color.GREEN);
+                iconHome.setIconColor(Color.GREEN);
+                    
+                stackedFontIcon.getChildren().addAll(iconHome, iconInfo);
+                
                 vbCenterRoot.setAlignment(Pos.CENTER);
                 vbCenterRoot.setMaxHeight(Double.MAX_VALUE);
                 
@@ -104,8 +114,7 @@ public class PrimaryController {
                 root.setBottom(btnReserveParcel);
                 root.setStyle("-fx-border-color: black;\n-fx-border-width: 5;\n-fx-border-radius: 10;");
                 root.setMaxSize(400, 400);
-            }
-            
+            }            
             
             @Override
             public void updateItem(Parcel item, boolean empty)
@@ -119,18 +128,31 @@ public class PrimaryController {
                 else
                 {
                     lblRoomId.setText(resourceBundle.getString("stringRoomId")+ item.getName());
+                    lblRoomId.setTextFill(item.isOccupied()? Color.BLACK : Color.GREEN);
                     btnReserveParcel.setText(item.isOccupied()? resourceBundle.getString("stringCheckout") : resourceBundle.getString("stringReserve"));
                     btnReserveParcel.setStyle(item.isOccupied()? "-fx-border-radius:0 0 10 10;\n-fx-background-radius: 0 0 10 10;" : "-fx-background-color: green;\n-fx-border-radius:0 0 10 10;\n-fx-background-radius: 0 0 10 10;");
                     lblCurrentStatus.setText(item.isOccupied()? resourceBundle.getString("stringOccupied") : resourceBundle.getString("stringReserve"));
-                    lblCurrentStatus.setStyle(item.isOccupied()? null : "-fx-text-fill: green;");
-                    icon.setIconColor(item.isOccupied()? Color.BLACK : Color.GREEN);
+                    lblCurrentStatus.setTextFill(item.isOccupied()? Color.BLACK : Color.GREEN);  
+                    
+                    
+                    iconHome.setVisible(!item.isOccupied());
+                    iconInfo.setVisible(item.isOccupied());  
+                    if(iconInfo.isVisible()){
+                        iconInfo.setOnMouseClicked(mouseClickedEvent ->{
+                            showReservationInfo(item);
+                        });
+                    }
                     btnReserveParcel.setOnMouseClicked((t) -> {
                         dataModel.setCurrentParcel(item);
                         if(!item.isOccupied()){                            
-                            reserveRoom();
+                            if(reserveRoom()){
+                                
+                            }
                         }
                         else{
-                           cancelOrCheckout();
+                                    
+                            iconHome.setOnMouseClicked(null);
+                            cancelOrCheckout();
                         }
                                            
                     });
@@ -145,7 +167,7 @@ public class PrimaryController {
         parcelList.addAll(dataModel.dbGetAllParcels());
     }
     
-    private ListView<Client> setupClientListView(String mode){
+    private ListView<Client> setupClientListView(MODE mode){
         ListView<Client> lvClient = new ListView();
         lvClient.setItems(clientList);        
         
@@ -182,10 +204,10 @@ public class PrimaryController {
                 btnMode.setMaxWidth(Double.MAX_VALUE);
                 btnMode.setPrefHeight(35);
                 switch (mode) {
-                    case "SELECT_CLIENT":
+                    case SELECT_CLIENT:
                         btnMode.setText(resourceBundle.getString("btnModeTextSelect"));
                         break;
-                    case "EDIT_CLIENT":
+                    case EDIT_CLIENT:
                         btnMode.setText(resourceBundle.getString("btnModeTextEdit"));
                         break;
                     default:
@@ -213,10 +235,10 @@ public class PrimaryController {
                     lblClientDni.setText(item.getDni());
                     lblClientVehiclePlateNumber.setText(item.getVehiclePlateNumber());
                     switch (mode) {
-                        case "SELECT_CLIENT":
+                        case SELECT_CLIENT:
                             btnMode.setDisable(true);
                             break;
-                        case "EDIT_CLIENT":
+                        case EDIT_CLIENT:
                             btnMode.setOnAction((t) -> {
                                 editClient(item);
                             });
@@ -238,8 +260,63 @@ public class PrimaryController {
         return lvClient;
     }    
     
+    private void showReservationInfo(Parcel parcel){
+        BorderPane root = new BorderPane();          
+        
+        // Create the custom dialog.
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle(resourceBundle.getString("reservationInfoDialogTitle"));
+        dialog.setHeaderText(resourceBundle.getString("reservationInfoDialogHeader") + " " + parcel.getName());
+        
+        // Set the button types.
+        ButtonType btntDone = new ButtonType(resourceBundle.getString("reservationInfoDialogDoneBtn"), ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(btntDone);
+       
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+        
+        TextField tfRoomName = new TextField(parcel.getName());
+        tfRoomName.setEditable(false);
+        TextField tfRoomOccupied = new TextField(!parcel.isOccupied() ? resourceBundle.getString("reservationInfoDialogAvailable") : resourceBundle.getString("reservationInfoDialogOccupied"));
+        tfRoomOccupied.setEditable(false);
+        TextField tfClientName = new TextField(dataModel.currentClientProperty().get().getFirstName() + " " + dataModel.currentClientProperty().get().getLastName());
+        tfClientName.setEditable(false);
+        TextField tfClientNumber = new TextField(dataModel.currentClientProperty().get().getPhoneNumber());
+        tfClientNumber.setEditable(false);
+        TextField tfClientDni = new TextField(dataModel.currentClientProperty().get().getDni());
+        tfClientDni.setEditable(false);
+        TextField tfClientVpn = new TextField(dataModel.currentClientProperty().get().getVehiclePlateNumber());
+        tfClientVpn.setEditable(false);
+        
+        grid.add(new Label(resourceBundle.getString("reservationInfoDialogRoomName")), 0, 0);
+        grid.add(tfRoomName, 1, 0);
+        grid.add(new Label(resourceBundle.getString("reservationInfoDialogRoomOccupied")), 0, 1);
+        grid.add(tfRoomOccupied, 1, 1);
+        grid.add(new Label(resourceBundle.getString("reservationInfoDialogClientName")), 0, 2);
+        grid.add(tfClientName, 1, 2);
+        grid.add(new Label(resourceBundle.getString("reservationInfoDialogClientPhone")), 0, 3);
+        grid.add(tfClientNumber, 1, 3);
+        grid.add(new Label(resourceBundle.getString("reservationInfoDialogClientDni")), 0, 4);
+        grid.add(tfClientDni, 1, 4);
+        grid.add(new Label(resourceBundle.getString("reservationInfoDialogClientVpn")), 0, 5);
+        grid.add(tfClientVpn, 1, 5);
+
+        Button btnAdd = (Button)dialog.getDialogPane().lookupButton(btntDone);
+        btnAdd.disableProperty().bind(
+            Bindings.isEmpty(tfRoomName.textProperty())
+            .or(Bindings.isEmpty(tfRoomOccupied.textProperty()))
+            .or(Bindings.isEmpty(tfClientName.textProperty()))
+            .or(Bindings.isEmpty(tfClientNumber.textProperty()))
+        );
+        
+        root.setCenter(grid);       
+        dialog.getDialogPane().setContent(root);
+        dialog.showAndWait();
+    }
     
-    private void reserveRoom(){
+    private boolean reserveRoom(){
         BorderPane root = new BorderPane();          
         
         // Create the custom dialog.
@@ -250,9 +327,7 @@ public class PrimaryController {
         // Set the button types.
         ButtonType btntAdd = new ButtonType(resourceBundle.getString("reserveRoomDialogAddBtn"), ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(btntAdd, ButtonType.CANCEL);
-
        
-        // Create the username and password labels and fields.
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -285,7 +360,6 @@ public class PrimaryController {
         grid.add(new Label(resourceBundle.getString("reserveRoomDialogClientVpn")), 0, 5);
         grid.add(tfClientVpn, 1, 5);
 
-        // Enable/Disable login button depending on whether a username was entered.
         Button btnAdd = (Button)dialog.getDialogPane().lookupButton(btntAdd);
         btnAdd.disableProperty().bind(
             Bindings.isEmpty(tfRoomName.textProperty())
@@ -294,7 +368,7 @@ public class PrimaryController {
             .or(Bindings.isEmpty(tfClientNumber.textProperty()))
         );
 
-        root.setLeft(setupClientListView("SELECT_CLIENT"));
+        root.setLeft(setupClientListView(MODE.SELECT_CLIENT));
         dataModel.currentClientProperty().addListener((ov, oldClient, newClient) -> {
             if(newClient != null){
                 tfClientName.setText(newClient.getFirstName() + " " + newClient.getLastName());
@@ -319,6 +393,7 @@ public class PrimaryController {
             return null;
         });
 
+        AtomicBoolean atomicBoolean = new AtomicBoolean(false);
         Optional<Reservation> result = dialog.showAndWait();
         result.ifPresent((t) -> {
             if(dataModel.addNewReservation(t)){
@@ -329,7 +404,8 @@ public class PrimaryController {
                     Parcel tempParcel = new Parcel(dataModel.currentParcelProperty().get().getId(), dataModel.currentParcelProperty().get().getName(), !dataModel.currentParcelProperty().get().isOccupied());
                     if(dataModel.updateParcelOccupied(tempParcel))
                     {
-                        dataModel.currentParcelProperty().get().setOccupied(!dataModel.currentParcelProperty().get().isOccupied());
+                        dataModel.currentParcelProperty().get().setOccupied(!dataModel.currentParcelProperty().get().isOccupied());   
+                        atomicBoolean.set(true);
                     }
                     else{
                        //Todo - show alert for update error!
@@ -338,8 +414,10 @@ public class PrimaryController {
             }      
             else{
                 //Todo - add error alert!
-            }
+            }            
         });    
+        
+        return atomicBoolean.get();
     }
     
     private void cancelOrCheckout(){
@@ -539,7 +617,7 @@ public class PrimaryController {
         );
 
         BorderPane root = new BorderPane();
-        root.setTop(setupClientListView("EDIT_CLIENT"));
+        root.setTop(setupClientListView(MODE.EDIT_CLIENT));
         
         Label lblAddNewClientText = new Label(resourceBundle.getString("clientDialogAddNewClientLabel"));
         lblAddNewClientText.setPadding(new Insets(10, 0, 0, 0));

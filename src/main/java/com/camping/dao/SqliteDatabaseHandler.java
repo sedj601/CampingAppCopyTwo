@@ -189,6 +189,10 @@ public class SqliteDatabaseHandler implements AutoCloseable
         }
     }
     
+    public Client getClient(Reservation reservation){
+        
+    }
+    
     
     
     public List<Reservation> getAllReservations(){
