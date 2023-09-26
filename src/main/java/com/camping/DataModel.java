@@ -97,7 +97,11 @@ public class DataModel {
     }     
     
     public Client getClient(Reservation reservation){
+        SqliteDatabaseHandler sqliteDatabaseHandler = new SqliteDatabaseHandler();        
+        Client client = sqliteDatabaseHandler.getClient(reservation);        
+        sqliteDatabaseHandler.closeConnection();
         
+        return client;
     }
     
     public boolean addNewClient(Client client){

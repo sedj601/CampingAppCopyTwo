@@ -190,7 +190,32 @@ public class SqliteDatabaseHandler implements AutoCloseable
     }
     
     public Client getClient(Reservation reservation){
+        String query = "SELECT client.client_id, client.first_name, client.last_name, client.phone_number, client.dni, client.vehicle_plate_number FROM reservation LEFT JOIN client ON reservation.client_id = client.client_id WHERE reservation_id = 3";
+                
         
+
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+            while (resultSet.next()) {
+                Client client = new Client(
+                        resultSet.getInt("client_id"), 
+                        resultSet.getString("first_name"), 
+                        resultSet.getString("last_name"),
+                        resultSet.getString("phone_number"), 
+                        resultSet.getString("dni"),
+                        resultSet.getString("vehicle_plate_number")
+                );
+                
+                return client;
+            }
+        }
+        catch (SQLException ex) {
+            System.out.println(ex.toString());
+        }        
+        
+        Client dummyClient = new Client(-1, "-1", "-1", "-1", "-1", "-1");
+        
+        return dummyClient;
     }
     
     
