@@ -25,6 +25,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -98,7 +99,6 @@ public class PrimaryController {
                 iconInfo.setIconSize(100);
                 iconHome.setIconSize(100);
                 iconInfo.setIconColor(Color.GREEN);
-                iconHome.setIconColor(Color.GREEN);
                     
                 stackedFontIcon.getChildren().addAll(iconHome, iconInfo);
                 
@@ -108,7 +108,8 @@ public class PrimaryController {
                 btnReserveParcel.setFont(Font.font("System", FontWeight.NORMAL, 28));
                 btnReserveParcel.setMaxWidth(Double.MAX_VALUE);
                 btnReserveParcel.setPrefHeight(100);
-                
+                btnReserveParcel.setStyle("-fx-background-color: green;\n-fx-border-radius:0 0 10 10;\n-fx-background-radius: 0 0 10 10;");
+
                 root.setTop(spTopRoot);
                 root.setCenter(vbCenterRoot);
                 root.setBottom(btnReserveParcel);
@@ -128,13 +129,9 @@ public class PrimaryController {
                 else
                 {
                     lblRoomId.setText(resourceBundle.getString("stringRoomId")+ item.getName());
-                    lblRoomId.setTextFill(item.isOccupied()? Color.BLACK : Color.GREEN);
                     btnReserveParcel.setText(item.isOccupied()? resourceBundle.getString("stringCheckout") : resourceBundle.getString("stringReserve"));
-                    btnReserveParcel.setStyle(item.isOccupied()? "-fx-border-radius:0 0 10 10;\n-fx-background-radius: 0 0 10 10;" : "-fx-background-color: green;\n-fx-border-radius:0 0 10 10;\n-fx-background-radius: 0 0 10 10;");
                     lblCurrentStatus.setText(item.isOccupied()? resourceBundle.getString("stringOccupied") : resourceBundle.getString("stringReserve"));
-                    lblCurrentStatus.setTextFill(item.isOccupied()? Color.BLACK : Color.GREEN);  
-                    
-                    
+             
                     iconHome.setVisible(!item.isOccupied());
                     iconInfo.setVisible(item.isOccupied());  
                     if(iconInfo.isVisible()){
@@ -145,14 +142,10 @@ public class PrimaryController {
                     btnReserveParcel.setOnMouseClicked((t) -> {
                         dataModel.setCurrentParcel(item);
                         if(!item.isOccupied()){                            
-                            if(reserveRoom()){
-                                
-                            }
+                            reserveRoom();                       
                         }
-                        else{
-                                    
-                            iconHome.setOnMouseClicked(null);
-                            cancelOrCheckout();
+                        else{                     
+                            cancelOrCheckout(item);
                         }
                                            
                     });
@@ -261,59 +254,65 @@ public class PrimaryController {
     }    
     
     private void showReservationInfo(Parcel parcel){
-        BorderPane root = new BorderPane();          
-        
-        // Create the custom dialog.
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle(resourceBundle.getString("reservationInfoDialogTitle"));
-        dialog.setHeaderText(resourceBundle.getString("reservationInfoDialogHeader") + " " + parcel.getName());
-        
-        // Set the button types.
-        ButtonType btntDone = new ButtonType(resourceBundle.getString("reservationInfoDialogDoneBtn"), ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(btntDone);
-       
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
-        
-        TextField tfRoomName = new TextField(parcel.getName());
-        tfRoomName.setEditable(false);
-        TextField tfRoomOccupied = new TextField(!parcel.isOccupied() ? resourceBundle.getString("reservationInfoDialogAvailable") : resourceBundle.getString("reservationInfoDialogOccupied"));
-        tfRoomOccupied.setEditable(false);
-        TextField tfClientName = new TextField(dataModel.currentClientProperty().get().getFirstName() + " " + dataModel.currentClientProperty().get().getLastName());
-        tfClientName.setEditable(false);
-        TextField tfClientNumber = new TextField(dataModel.currentClientProperty().get().getPhoneNumber());
-        tfClientNumber.setEditable(false);
-        TextField tfClientDni = new TextField(dataModel.currentClientProperty().get().getDni());
-        tfClientDni.setEditable(false);
-        TextField tfClientVpn = new TextField(dataModel.currentClientProperty().get().getVehiclePlateNumber());
-        tfClientVpn.setEditable(false);
-        
-        grid.add(new Label(resourceBundle.getString("reservationInfoDialogRoomName")), 0, 0);
-        grid.add(tfRoomName, 1, 0);
-        grid.add(new Label(resourceBundle.getString("reservationInfoDialogRoomOccupied")), 0, 1);
-        grid.add(tfRoomOccupied, 1, 1);
-        grid.add(new Label(resourceBundle.getString("reservationInfoDialogClientName")), 0, 2);
-        grid.add(tfClientName, 1, 2);
-        grid.add(new Label(resourceBundle.getString("reservationInfoDialogClientPhone")), 0, 3);
-        grid.add(tfClientNumber, 1, 3);
-        grid.add(new Label(resourceBundle.getString("reservationInfoDialogClientDni")), 0, 4);
-        grid.add(tfClientDni, 1, 4);
-        grid.add(new Label(resourceBundle.getString("reservationInfoDialogClientVpn")), 0, 5);
-        grid.add(tfClientVpn, 1, 5);
+        Client client = dataModel.getClient(parcel);
+        if(client.getId() != -1){
+            BorderPane root = new BorderPane();          
 
-        Button btnAdd = (Button)dialog.getDialogPane().lookupButton(btntDone);
-        btnAdd.disableProperty().bind(
-            Bindings.isEmpty(tfRoomName.textProperty())
-            .or(Bindings.isEmpty(tfRoomOccupied.textProperty()))
-            .or(Bindings.isEmpty(tfClientName.textProperty()))
-            .or(Bindings.isEmpty(tfClientNumber.textProperty()))
-        );
-        
-        root.setCenter(grid);       
-        dialog.getDialogPane().setContent(root);
-        dialog.showAndWait();
+            // Create the custom dialog.
+            Dialog<Void> dialog = new Dialog<>();
+            dialog.setTitle(resourceBundle.getString("reservationInfoDialogTitle"));
+            dialog.setHeaderText(resourceBundle.getString("reservationInfoDialogHeader") + " " + parcel.getName());
+
+            // Set the button types.
+            ButtonType btntDone = new ButtonType(resourceBundle.getString("reservationInfoDialogDoneBtn"), ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(btntDone);
+
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(20, 150, 10, 10));
+
+            TextField tfRoomName = new TextField(parcel.getName());
+            tfRoomName.setEditable(false);
+            TextField tfRoomOccupied = new TextField(!parcel.isOccupied() ? resourceBundle.getString("reservationInfoDialogAvailable") : resourceBundle.getString("reservationInfoDialogOccupied"));
+            tfRoomOccupied.setEditable(false);
+            TextField tfClientName = new TextField(client.getFirstName() + " " + client.getLastName());
+            tfClientName.setEditable(false);
+            TextField tfClientNumber = new TextField(client.getPhoneNumber());
+            tfClientNumber.setEditable(false);
+            TextField tfClientDni = new TextField(client.getDni());
+            tfClientDni.setEditable(false);
+            TextField tfClientVpn = new TextField(client.getVehiclePlateNumber());
+            tfClientVpn.setEditable(false);
+
+            grid.add(new Label(resourceBundle.getString("reservationInfoDialogRoomName")), 0, 0);
+            grid.add(tfRoomName, 1, 0);
+            grid.add(new Label(resourceBundle.getString("reservationInfoDialogRoomOccupied")), 0, 1);
+            grid.add(tfRoomOccupied, 1, 1);
+            grid.add(new Label(resourceBundle.getString("reservationInfoDialogClientName")), 0, 2);
+            grid.add(tfClientName, 1, 2);
+            grid.add(new Label(resourceBundle.getString("reservationInfoDialogClientPhone")), 0, 3);
+            grid.add(tfClientNumber, 1, 3);
+            grid.add(new Label(resourceBundle.getString("reservationInfoDialogClientDni")), 0, 4);
+            grid.add(tfClientDni, 1, 4);
+            grid.add(new Label(resourceBundle.getString("reservationInfoDialogClientVpn")), 0, 5);
+            grid.add(tfClientVpn, 1, 5);
+
+            Button btnAdd = (Button)dialog.getDialogPane().lookupButton(btntDone);
+            btnAdd.disableProperty().bind(
+                Bindings.isEmpty(tfRoomName.textProperty())
+                .or(Bindings.isEmpty(tfRoomOccupied.textProperty()))
+                .or(Bindings.isEmpty(tfClientName.textProperty()))
+                .or(Bindings.isEmpty(tfClientNumber.textProperty()))
+            );
+
+            root.setCenter(grid);       
+            dialog.getDialogPane().setContent(root);
+            dialog.showAndWait();
+        }
+        else{
+            //Todo error alert
+        }
     }
     
     private boolean reserveRoom(){
@@ -325,8 +324,8 @@ public class PrimaryController {
         dialog.setHeaderText(resourceBundle.getString("reserveRoomDialogHeader") + " " + dataModel.currentParcelProperty().get().getName());
         
         // Set the button types.
-        ButtonType btntAdd = new ButtonType(resourceBundle.getString("reserveRoomDialogAddBtn"), ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(btntAdd, ButtonType.CANCEL);
+        ButtonType btnSelect = new ButtonType(resourceBundle.getString("reserveRoomDialogSelectBtn"), ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(btnSelect, ButtonType.CANCEL);
        
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -360,7 +359,7 @@ public class PrimaryController {
         grid.add(new Label(resourceBundle.getString("reserveRoomDialogClientVpn")), 0, 5);
         grid.add(tfClientVpn, 1, 5);
 
-        Button btnAdd = (Button)dialog.getDialogPane().lookupButton(btntAdd);
+        Button btnAdd = (Button)dialog.getDialogPane().lookupButton(btnSelect);
         btnAdd.disableProperty().bind(
             Bindings.isEmpty(tfRoomName.textProperty())
             .or(Bindings.isEmpty(tfRoomOccupied.textProperty()))
@@ -368,7 +367,7 @@ public class PrimaryController {
             .or(Bindings.isEmpty(tfClientNumber.textProperty()))
         );
 
-        root.setLeft(setupClientListView(MODE.SELECT_CLIENT));
+        root.setTop(setupClientListView(MODE.SELECT_CLIENT));
         dataModel.currentClientProperty().addListener((ov, oldClient, newClient) -> {
             if(newClient != null){
                 tfClientName.setText(newClient.getFirstName() + " " + newClient.getLastName());
@@ -377,14 +376,14 @@ public class PrimaryController {
                 tfClientVpn.setText(newClient.getVehiclePlateNumber());
             }
         });
-        root.setRight(grid);
+        root.setBottom(grid);
        
         dialog.getDialogPane().setContent(root);
 
         Platform.runLater(() -> tfRoomName.requestFocus());
 
         dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == btntAdd) {
+            if (dialogButton == btnSelect) {
                 LocalDateTime checkInTime = LocalDateTime.now();
                 LocalDateTime checkoutTime = checkInTime.plusDays(1).withHour(11).withMinute(0).withSecond(0);
                 
@@ -420,7 +419,7 @@ public class PrimaryController {
         return atomicBoolean.get();
     }
     
-    private void cancelOrCheckout(){
+    private void cancelOrCheckout(Parcel parcel){
         Alert alert = new Alert(AlertType.CONFIRMATION);
         alert.setTitle("Confirmation Dialog");
         alert.setHeaderText("Checkout or Cancel Reservation Dialog");
@@ -434,13 +433,12 @@ public class PrimaryController {
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == btntCheckout){
-            Parcel tempCurrentParcel = dataModel.currentParcelProperty().get();
-            Parcel tempParcel = new Parcel(tempCurrentParcel.getId(), tempCurrentParcel.getName(), false);
-            
+            Parcel tempCurrentParcel = parcel;
+            Parcel tempParcel = new Parcel(tempCurrentParcel.getId(), tempCurrentParcel.getName(), false);            
             
             if(dataModel.updateParcelOccupied(tempParcel)){
                 tempCurrentParcel.setOccupied(false);
-                if(dataModel.updateReservationStatus(dataModel.currentClientProperty().get(), tempCurrentParcel, Reservation.STATUS.ACTIVE, Reservation.STATUS.COMPLETE))
+                if(dataModel.updateReservationStatus(tempCurrentParcel, Reservation.STATUS.ACTIVE, Reservation.STATUS.COMPLETE))
                 {
                     //Todo - alert checkout is complete
                 }
@@ -452,7 +450,22 @@ public class PrimaryController {
                 //Todo - aleart saying this failed!
             }
         } else if (result.get() == btntCancelReservation) {
-            dataModel.currentParcelProperty().get().setOccupied(false);
+            Parcel tempCurrentParcel = parcel;
+            Parcel tempParcel = new Parcel(tempCurrentParcel.getId(), tempCurrentParcel.getName(), false);
+                
+            if(dataModel.updateParcelOccupied(tempParcel)){                
+                tempCurrentParcel.setOccupied(false);
+                if(dataModel.updateReservationStatus(tempCurrentParcel, Reservation.STATUS.ACTIVE, Reservation.STATUS.CANCELED))
+                {
+                    //Todo - alert checkout is complete
+                }
+                else{
+                    //Todo - alert saying this failed!
+                }
+            }
+            else{
+                //Todo - aleart saying this failed!
+            }
         } else if (result.get() == btntCancel) {
             // ... user chose "Three"
         } else {
@@ -671,11 +684,6 @@ public class PrimaryController {
     }
     
     @FXML
-    void handleBtnExit(ActionEvent actionEvent){
-        Platform.exit();
-    }
-    
-    @FXML
     void handleBtnAddNewRoom(ActionEvent actionEvent){
         Dialog<Parcel> dialog = new Dialog<>();
         dialog.setTitle(resourceBundle.getString("addNewRoomDialogTitle"));
@@ -727,6 +735,13 @@ public class PrimaryController {
             }
         });    
     }
+    
+    @FXML
+    void handleIconExit(MouseEvent mouseEvent){
+        Platform.exit();
+    }
+    
+    
     
     
 }

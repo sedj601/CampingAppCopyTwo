@@ -96,9 +96,9 @@ public class DataModel {
         return clients;
     }     
     
-    public Client getClient(Reservation reservation){
+    public Client getClient(Parcel parcel){
         SqliteDatabaseHandler sqliteDatabaseHandler = new SqliteDatabaseHandler();        
-        Client client = sqliteDatabaseHandler.getClient(reservation);        
+        Client client = sqliteDatabaseHandler.getClient(parcel);        
         sqliteDatabaseHandler.closeConnection();
         
         return client;
@@ -137,9 +137,9 @@ public class DataModel {
         return reservations;
     }    
     
-    public boolean updateReservationStatus(Client client, Parcel parcel, STATUS oldStatus, STATUS newStatus){
+    public boolean updateReservationStatus(Parcel parcel, STATUS oldStatus, STATUS newStatus){
         SqliteDatabaseHandler sqliteDatabaseHandler = new SqliteDatabaseHandler();
-        boolean control = sqliteDatabaseHandler.updateReservationStatus(client, parcel, oldStatus, newStatus);
+        boolean control = sqliteDatabaseHandler.updateReservationStatus(parcel, oldStatus, newStatus);
         sqliteDatabaseHandler.closeConnection();
         
         return control;

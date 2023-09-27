@@ -8,57 +8,48 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 <?import org.controlsfx.control.GridView?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" style="-fx-background-color: #00797a;" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.camping.PrimaryController">
    <children>
-      <HBox alignment="CENTER" minHeight="85.0" style="-fx-background-color: #00797a;">
+      <StackPane prefHeight="85.0">
          <children>
-            <HBox alignment="CENTER">
-               <children>
-                  <Label maxHeight="1.7976931348623157E308" text="%mainTitle">
-                     <font>
-                        <Font name="Segoe UI Bold" size="26.0" />
-                     </font>
-                  </Label>
-               </children>
-            </HBox>
+            <Label maxHeight="1.7976931348623157E308" text="%mainTitle">
+               <font>
+                  <Font name="Segoe UI Bold" size="26.0" />
+               </font>
+            </Label>
+            <FontIcon iconLiteral="antf-close-circle" iconSize="30" onMouseClicked="#handleIconExit" StackPane.alignment="CENTER_RIGHT">
+               <StackPane.margin>
+                  <Insets right="10.0" />
+               </StackPane.margin></FontIcon>
          </children>
-         <VBox.margin>
-            <Insets />
-         </VBox.margin>
-      </HBox>
+      </StackPane>
       <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
          <children>
             <VBox prefWidth="200.0" spacing="10.0" style="-fx-background-color: #00797a;">
                <children>
-                  <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleBtnClients" text="%mainBtnOne" VBox.vgrow="ALWAYS">
+                  <Button maxHeight="200.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleBtnClients" VBox.vgrow="ALWAYS">
                      <VBox.margin>
                         <Insets left="10.0" right="10.0" />
                      </VBox.margin>
+                     <graphic>
+                        <VBox alignment="CENTER">
+                           <children>
+                              <Label text="%mainBtnClient">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                              <FontIcon iconLiteral="bi-person-square" iconSize="75" />
+                           </children>
+                        </VBox>
+                     </graphic>
                   </Button>
-                  <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleBtnTwo" text="%mainBtnTwo" VBox.vgrow="ALWAYS">
-                     <VBox.margin>
-                        <Insets left="10.0" right="10.0" />
-                     </VBox.margin>
-                  </Button>
-                  <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleBtnThree" text="%mainBtnThree" VBox.vgrow="ALWAYS">
-                     <VBox.margin>
-                        <Insets left="10.0" right="10.0" />
-                     </VBox.margin>
-                  </Button>
-                  <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleBtnFour" text="%mainBtnFour" VBox.vgrow="ALWAYS">
-                     <VBox.margin>
-                        <Insets left="10.0" right="10.0" />
-                     </VBox.margin>
-                  </Button>
-                  <StackPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
-                     <children>
-                        <Button mnemonicParsing="false" onAction="#handleBtnExit" prefWidth="100.0" text="%mainBtnExit" />
-                     </children>
-                  </StackPane>
+                  <StackPane maxWidth="1.7976931348623157E308" />
                </children>
                <HBox.margin>
-                  <Insets top="10.0" />
+                  <Insets />
                </HBox.margin>
             </VBox>
             <VBox prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">

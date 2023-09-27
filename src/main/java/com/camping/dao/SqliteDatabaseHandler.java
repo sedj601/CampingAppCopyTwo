@@ -189,13 +189,15 @@ public class SqliteDatabaseHandler implements AutoCloseable
         }
     }
     
-    public Client getClient(Reservation reservation){
-        String query = "SELECT client.client_id, client.first_name, client.last_name, client.phone_number, client.dni, client.vehicle_plate_number FROM reservation LEFT JOIN client ON reservation.client_id = client.client_id WHERE reservation_id = 3";
+    public Client getClient(Parcel parcel){
+        String sqlQuery = "SELECT client.client_id, client.first_name, client.last_name, client.phone_number, client.dni, client.vehicle_plate_number FROM reservation LEFT JOIN client ON reservation.client_id = client.client_id WHERE parcel_id = ? and status = 0";
                 
         
 
-        try (Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
+        try {
+            PreparedStatement pstmt = connection.prepareStatement(sqlQuery);
+            pstmt.setInt(1, parcel.getId());
+            ResultSet resultSet = pstmt.executeQuery();   
             while (resultSet.next()) {
                 Client client = new Client(
                         resultSet.getInt("client_id"), 
@@ -246,14 +248,13 @@ public class SqliteDatabaseHandler implements AutoCloseable
         return data;
     }
     
-    public boolean updateReservationStatus(Client client, Parcel parcel, STATUS oldStatus, STATUS newStatus){
-        String sqlQuery = "UPDATE reservation SET status = ? WHERE client_id = ? AND parcel_id = ? AND status = ?";
+    public boolean updateReservationStatus(Parcel parcel, STATUS oldStatus, STATUS newStatus){
+        String sqlQuery = "UPDATE reservation SET status = ? WHERE parcel_id = ? AND status = ?";
 
         try (PreparedStatement pstmt = connection.prepareStatement(sqlQuery)) {
             pstmt.setInt(1, STATUS.convertStatusToInt(newStatus));
-            pstmt.setInt(2, client.getId());
-            pstmt.setInt(3, parcel.getId());
-            pstmt.setInt(4, STATUS.convertStatusToInt(oldStatus));
+            pstmt.setInt(2, parcel.getId());
+            pstmt.setInt(3, STATUS.convertStatusToInt(oldStatus));
             pstmt.executeUpdate();
             return true;
         }
