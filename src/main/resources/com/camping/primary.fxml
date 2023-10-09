@@ -9,6 +9,8 @@
 <?import javafx.scene.text.Font?>
 <?import org.controlsfx.control.GridView?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import org.kordamp.ikonli.antdesignicons.AntDesignIconsFilled?>
+<?import org.kordamp.ikonli.antdesignicons.AntDesignIconsOutlined?>
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" style="-fx-background-color: #00797a;" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.camping.PrimaryController">
    <children>
@@ -22,7 +24,8 @@
             <FontIcon iconLiteral="antf-close-circle" iconSize="30" onMouseClicked="#handleIconExit" StackPane.alignment="CENTER_RIGHT">
                <StackPane.margin>
                   <Insets right="10.0" />
-               </StackPane.margin></FontIcon>
+               </StackPane.margin>
+            </FontIcon>
          </children>
       </StackPane>
       <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
@@ -41,7 +44,7 @@
                                     <Font size="14.0" />
                                  </font>
                               </Label>
-                              <FontIcon iconLiteral="bi-person-square" iconSize="75" />
+                              <FontIcon iconLiteral="antf-idcard" iconSize="75"/>
                            </children>
                         </VBox>
                      </graphic>

@@ -38,6 +38,7 @@ import org.controlsfx.control.GridCell;
 import org.controlsfx.control.GridView;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.javafx.StackedFontIcon;
+import org.kordamp.ikonli.antdesignicons.AntDesignIconsFilled;
 
 public class PrimaryController {
     @FXML GridView<Parcel> gvParcel;
@@ -72,13 +73,13 @@ public class PrimaryController {
         gvParcel.setCellFactory(gv -> new GridCell<Parcel>()
         {
             Label lblRoomId = new Label(); 
-            FontIcon iconDeleteRoom = new FontIcon("antf-close-circle");
+            FontIcon iconDeleteRoom = new FontIcon(AntDesignIconsFilled.CLOSE_CIRCLE);
             StackPane spTopRoot = new StackPane(lblRoomId, iconDeleteRoom);
             
             Label lblStatusTitle = new Label();
             Label lblCurrentStatus = new Label();
-            FontIcon iconHome = new FontIcon("antf-home");
-            FontIcon iconInfo = new FontIcon("antf-info-circle");
+            FontIcon iconHome = new FontIcon(AntDesignIconsFilled.HOME);
+            FontIcon iconInfo = new FontIcon(AntDesignIconsFilled.INFO_CIRCLE);
             StackedFontIcon stackedFontIcon = new StackedFontIcon();
             VBox vbCenterRoot = new VBox(lblStatusTitle, lblCurrentStatus, stackedFontIcon);
             
@@ -168,7 +169,7 @@ public class PrimaryController {
             Label lblClientFirstName = new Label(); 
             Label lblClientLastName = new Label();
             HBox hBox = new HBox(lblClientFirstName, lblClientLastName);            
-            FontIcon iconDeleteClient = new FontIcon("antf-close-circle");
+            FontIcon iconDeleteClient = new FontIcon(AntDesignIconsFilled.CLOSE_CIRCLE);
             StackPane spTopRoot = new StackPane(hBox, iconDeleteClient);
             
             Label lblClientPhoneNumber = new Label();
