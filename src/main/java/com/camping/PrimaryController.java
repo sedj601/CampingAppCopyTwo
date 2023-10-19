@@ -476,7 +476,7 @@ public class PrimaryController {
     
     private void deleteRoom(Parcel parcel){
         Alert alert = new Alert(AlertType.CONFIRMATION);
-        alert.setTitle(resourceBundle.getString("confirmtionDialogTitle"));
+        alert.setTitle(resourceBundle.getString("confirmationDialogTitle"));
         alert.setHeaderText(resourceBundle.getString("deleleRoomConfirmationHeader"));
         alert.setContentText(resourceBundle.getString("deleleRoomConfirmationContentText") + " " + parcel.getName() + "?");
 
@@ -565,9 +565,9 @@ public class PrimaryController {
     
     private void deleteClient(Client client){
         Alert alert = new Alert(AlertType.CONFIRMATION);
-        alert.setTitle(resourceBundle.getString("confirmtionDialogTitle"));
+        alert.setTitle(resourceBundle.getString("confirmationDialogTitle"));
         alert.setHeaderText(resourceBundle.getString("deleteClientConfirmationHeader"));
-        alert.setContentText(resourceBundle.getString("deleteClientContentText") + " " + client.getFirstName() + " " + client.getLastName());
+        alert.setContentText(resourceBundle.getString("deleteClientConfirmationContentText") + " " + client.getFirstName() + " " + client.getLastName());
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == ButtonType.OK){
@@ -741,8 +741,4 @@ public class PrimaryController {
     void handleIconExit(MouseEvent mouseEvent){
         Platform.exit();
     }
-    
-    
-    
-    
 }
